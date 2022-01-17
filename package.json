@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "build": "tsc",
-    "prepublishOnly": "npm run test && npm run build"
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
@@ -37,6 +36,5 @@
   "dependencies": {},
   "jest": {
     "preset": "ts-jest"
-  },
-  "files": ["lib/**/*"]
+  }
 }
