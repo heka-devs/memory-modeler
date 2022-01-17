@@ -1,2 +1,3 @@
-import { main } from "./src/index";
-export { main };
+import createModel from "./src/createModel";
+
+export { createModel };

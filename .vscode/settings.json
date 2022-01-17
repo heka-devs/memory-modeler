@@ -3,5 +3,7 @@
     "cSpell.words": [
         "heka",
         "hekahappy"
-    ]
+    ],
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
 }
