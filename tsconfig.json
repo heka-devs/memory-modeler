@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+      "allowSyntheticDefaultImports": true,
+      "esModuleInterop": true,
+      "lib": ["ESNext", "dom"],
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+      "outDir": "lib",
+      "sourceMap": true,
+      "target": "es5",
+      "resolveJsonModule": true,
+      "declaration": true
+    },
+    "exclude": ["node_modules"],
+    "include": ["./src/*"]
+  }
+  
