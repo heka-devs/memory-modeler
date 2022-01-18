@@ -7,6 +7,13 @@ class MemoryModel<RecordType> extends BaseModel<RecordType> {
     this._records = [];
   }
 
+  doesRecordMatchesFilter(record: RecordType, filterQuery: Partial<RecordType>) {
+    return Object.entries(filterQuery).every(([filterKey, filterValue]) => {
+      const recordValue = record[filterKey as keyof RecordType];
+      return filterValue === recordValue;
+    });
+  }
+
   async create(record: RecordType) {
     const preparedRecord = this.createPreparation(record);
     this._records.push(preparedRecord);
@@ -17,36 +24,39 @@ class MemoryModel<RecordType> extends BaseModel<RecordType> {
     const preparedQuery = this.matchPreparation(filterQuery);
 
     const matchedRecords = this._records.filter((record) => {
-      return Object.entries(preparedQuery).every(([filterKey, filterValue]) => {
-        const recordValue = record[filterKey as keyof RecordType];
-        return filterValue === recordValue;
-      });
+      const recordMatchesFilter = this.doesRecordMatchesFilter(record, preparedQuery);
+      return recordMatchesFilter;
     });
 
     return matchedRecords;
   }
 
-  // should update multiple records, remove ATLEAST
-  async update(record: any) {
-    // const indexOfRecordToUpdate = this._records.findIndex((existingRecord) => existingRecord.pid === record.pid);
+  async update(updateFilter: Partial<RecordType>, updateFields: Partial<RecordType>) {
+    const preparedFilter = this.updatePreparation(updateFilter);
 
-    // if (record && record.pid && indexOfRecordToUpdate !== -1) {
-    //   this._records[indexOfRecordToUpdate] = { ...this._records[indexOfRecordToUpdate], ...record };
-    //   return this._records[indexOfRecordToUpdate];
-    // } else {
-    //   throw new Error("Cannot update record, no record exists");
-    // }
-    return record;
+    let updateCounter = 0;
+    const updatedRecords = this._records.map((record) => {
+      const recordMatchesFilter = this.doesRecordMatchesFilter(record, preparedFilter);
+      if (recordMatchesFilter) {
+        updateCounter++;
+        return { ...record, ...updateFields };
+      } else {
+        return record;
+      }
+    });
+
+    this._records = updatedRecords;
+    return updateCounter;
   }
 
-  // Take filter query and delete all
   async delete(deleteFilter: Partial<RecordType>) {
+    const preparedDeleteFilter = this.deletePreparation(deleteFilter);
+
     const recordsToKeep = this._records.filter((record) => {
-      return Object.entries(deleteFilter).some(([filterKey, filterValue]) => {
-        const recordValue = record[filterKey as keyof RecordType];
-        return filterValue !== recordValue;
-      });
+      const recordMatchesFilter = this.doesRecordMatchesFilter(record, preparedDeleteFilter);
+      return !recordMatchesFilter;
     });
+
     const deletedCount = this._records.length - recordsToKeep.length;
     this._records = recordsToKeep;
     return deletedCount;

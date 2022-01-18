@@ -15,6 +15,10 @@ class BaseModel<RecordType> {
   updatePreparation(record: Partial<RecordType>) {
     return record;
   }
+
+  deletePreparation(deleteQuery: Partial<RecordType>) {
+    return deleteQuery;
+  }
 }
 
 export default BaseModel;

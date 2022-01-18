@@ -49,10 +49,12 @@ describe("match", () => {
 
 describe("update", () => {
   test("can update record", async () => {
-    const user = await users.create({ id: "59c96c5f-6c78-4d06-9722-068280be53a3", firstName: "Denis" });
+    const user = await users.create({ id: "36f2089e-b93c-4989-b8dd-63e9c3dee708", firstName: "Denis" });
 
-    const updatedUser = await users.update({ id: user.id, firstName: "Deniz" });
-    expect(updatedUser).toEqual({ id: user.id, firstName: "Deniz" });
+    const updatedUserCount = await users.update({ id: user.id }, { firstName: "Deniz" });
+    expect(updatedUserCount).toBe(1);
+    const updatedUser = await users.match({ id: user.id });
+    expect(updatedUser).toEqual([{ id: user.id, firstName: "Deniz" }]);
   });
 });
 
