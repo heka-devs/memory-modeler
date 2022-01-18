@@ -1,11 +1,12 @@
 import { defaultModelCreation } from "../src/createModel";
 
-export type UniqueIdentifier = any;
-
 interface User {
-  id: UniqueIdentifier;
+  id: string;
+  createdAt: string;
+  updatedAt: string;
   firstName: string;
 }
+type IDefaultedFields = Pick<User, "id" | "createdAt" | "updatedAt">;
 
 const create = async (tableName: string, record: any) => {
   console.log({ tableName });
@@ -27,40 +28,68 @@ const softDelete = async (tableName: string, deleteFilter: Partial<any>) => {
   return 1;
 };
 
-const createModel = defaultModelCreation("memory", { create, match, update, delete: softDelete });
+const createModel = defaultModelCreation<IDefaultedFields>(
+  "memory",
+  {
+    create,
+    match,
+    update,
+    delete: softDelete
+  },
+  {
+    createPreparation: (record) => {
+      record.id = Math.floor(Math.random() * 1000000) + 1;
+      record.createdAt = "2000-10-00T10:00:00";
+      record.updatedAt = "2000-10-00T10:00:00";
+      return record;
+    },
+    updatePreparation: (record) => {
+      record.updatedAt = "2020-12-00T10:00:00";
+      return record;
+    }
+  }
+);
 
 const users = createModel<User>("users");
 
 describe("create", () => {
   test("can create a user record", async () => {
-    const user = await users.create({ id: "f2eaba08-492c-494c-a1be-727856df8c6c", firstName: "Tony" });
-    expect(user).toEqual({ id: user.id, firstName: "Tony" });
+    const user = await users.create({ firstName: "Tony" });
+    expect(user).toEqual({
+      id: user.id,
+      firstName: "Tony",
+      createdAt: "2000-10-00T10:00:00",
+      updatedAt: "2000-10-00T10:00:00"
+    });
   });
 });
 
 describe("match", () => {
   test("can match records based on query", async () => {
-    const user = await users.create({ id: "59c96c5f-6c78-4d06-9722-068280be53a3", firstName: "Denis" });
+    const user = await users.create({ firstName: "Denis" });
 
-    const matchedUsers = await users.match({ firstName: "Denis" });
-    expect(matchedUsers).toEqual([user]);
+    const matchedUsers = await users.match({ id: user.id, firstName: "Denis" });
+    expect(matchedUsers.length).toBe(1);
+    expect(matchedUsers[0].firstName).toBe("Denis");
   });
 });
 
 describe("update", () => {
   test("can update record", async () => {
-    const user = await users.create({ id: "36f2089e-b93c-4989-b8dd-63e9c3dee708", firstName: "Denis" });
+    const user = await users.create({ firstName: "denis2" });
 
     const updatedUserCount = await users.update({ id: user.id }, { firstName: "Deniz" });
     expect(updatedUserCount).toBe(1);
     const updatedUser = await users.match({ id: user.id });
-    expect(updatedUser).toEqual([{ id: user.id, firstName: "Deniz" }]);
+    expect(updatedUser).toEqual([
+      { id: user.id, firstName: "Deniz", createdAt: "2000-10-00T10:00:00", updatedAt: "2020-12-00T10:00:00" }
+    ]);
   });
 });
 
 describe("delete", () => {
   test("can delete record", async () => {
-    const user = await users.create({ id: "38d66c73-d051-4a7b-a116-953f75b26157", firstName: "Simon" });
+    const user = await users.create({ firstName: "Simon" });
 
     const deletedUser = await users.delete({ id: user.id });
     expect(deletedUser).toBe(1);

@@ -1,30 +1,37 @@
 import BaseModel from "./BaseModel";
+import type { Without } from "../types";
 
-class MemoryModel<RecordType> extends BaseModel<RecordType> {
+export interface IMemoryModelOptions {
+  createPreparation: <T>(record: any) => T;
+  updatePreparation: <T>(record: any) => T;
+}
+
+class MemoryModel<RecordType, DefaultedFields = Record<string, never>> extends BaseModel {
   _records: RecordType[];
-  constructor(name: string) {
+  readonly memoryModelOptions: IMemoryModelOptions;
+
+  constructor(name: string, options: IMemoryModelOptions) {
     super(name);
     this._records = [];
+    this.memoryModelOptions = options;
   }
 
-  doesRecordMatchesFilter(record: RecordType, filterQuery: Partial<RecordType>) {
+  doesRecordMatchFilter(record: RecordType, filterQuery: Partial<RecordType>) {
     return Object.entries(filterQuery).every(([filterKey, filterValue]) => {
       const recordValue = record[filterKey as keyof RecordType];
       return filterValue === recordValue;
     });
   }
 
-  async create(record: RecordType) {
-    const preparedRecord = this.createPreparation(record);
-    this._records.push(preparedRecord);
-    return preparedRecord;
+  async create(record: Without<RecordType, DefaultedFields>) {
+    const recordWithDefaults = this.memoryModelOptions.createPreparation<RecordType>({ ...record });
+    this._records.push(recordWithDefaults);
+    return recordWithDefaults;
   }
 
   async match(filterQuery: Partial<RecordType>) {
-    const preparedQuery = this.matchPreparation(filterQuery);
-
     const matchedRecords = this._records.filter((record) => {
-      const recordMatchesFilter = this.doesRecordMatchesFilter(record, preparedQuery);
+      const recordMatchesFilter = this.doesRecordMatchFilter(record, filterQuery);
       return recordMatchesFilter;
     });
 
@@ -32,14 +39,17 @@ class MemoryModel<RecordType> extends BaseModel<RecordType> {
   }
 
   async update(updateFilter: Partial<RecordType>, updateFields: Partial<RecordType>) {
-    const preparedFilter = this.updatePreparation(updateFilter);
+    let fieldsCopy = { ...updateFields };
+    if (this.memoryModelOptions.updatePreparation) {
+      fieldsCopy = this.memoryModelOptions.updatePreparation<Partial<RecordType>>(updateFields);
+    }
 
     let updateCounter = 0;
     const updatedRecords = this._records.map((record) => {
-      const recordMatchesFilter = this.doesRecordMatchesFilter(record, preparedFilter);
+      const recordMatchesFilter = this.doesRecordMatchFilter(record, updateFilter);
       if (recordMatchesFilter) {
         updateCounter++;
-        return { ...record, ...updateFields };
+        return { ...record, ...fieldsCopy };
       } else {
         return record;
       }
@@ -50,10 +60,8 @@ class MemoryModel<RecordType> extends BaseModel<RecordType> {
   }
 
   async delete(deleteFilter: Partial<RecordType>) {
-    const preparedDeleteFilter = this.deletePreparation(deleteFilter);
-
     const recordsToKeep = this._records.filter((record) => {
-      const recordMatchesFilter = this.doesRecordMatchesFilter(record, preparedDeleteFilter);
+      const recordMatchesFilter = this.doesRecordMatchFilter(record, deleteFilter);
       return !recordMatchesFilter;
     });
 

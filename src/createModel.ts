@@ -1,21 +1,33 @@
 import MemoryModel from "./modelTypes/MemoryModel";
 import CustomModel from "./modelTypes/CustomModel";
 import type { ICustomModelOptions } from "./modelTypes/CustomModel";
+import type { IMemoryModelOptions } from "./modelTypes/MemoryModel";
+
+export function defaultModelCreation<DefaultedFields = Record<string, never>>(
+  modelType: "memory" | "custom",
+  customModelOptions: ICustomModelOptions,
+  memoryModelOptions: IMemoryModelOptions
+) {
+  return <RecordType>(name: string) =>
+    createModel<RecordType, DefaultedFields>({ name, modelType, customModelOptions, memoryModelOptions });
+}
 
 interface ICreateModelArgs {
   name: string;
   modelType: "memory" | "custom";
   customModelOptions: ICustomModelOptions;
+  memoryModelOptions: IMemoryModelOptions;
 }
 
-export function defaultModelCreation(modelType: "memory" | "custom", customModelOptions: ICustomModelOptions) {
-  return <T>(name: string) => createModel<T>({ name, modelType, customModelOptions });
-}
-
-export function createModel<RecordType>({ name, modelType, customModelOptions }: ICreateModelArgs) {
+export function createModel<RecordType, DefaultedFields>({
+  name,
+  modelType,
+  customModelOptions,
+  memoryModelOptions
+}: ICreateModelArgs) {
   if (modelType === "custom") {
-    return new CustomModel<RecordType>(name, customModelOptions);
+    return new CustomModel<RecordType, DefaultedFields>(name, customModelOptions);
   } else {
-    return new MemoryModel<RecordType>(name);
+    return new MemoryModel<RecordType, DefaultedFields>(name, memoryModelOptions);
   }
 }
