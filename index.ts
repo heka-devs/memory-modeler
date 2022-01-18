@@ -1,3 +1,3 @@
-import createModel from "./src/createModel";
+import { defaultModelCreation, createModel } from "./src/createModel";
 
-export { createModel };
+export { createModel, defaultModelCreation };
