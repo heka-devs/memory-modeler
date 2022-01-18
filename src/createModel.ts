@@ -1,11 +1,21 @@
-import MemoryModel from "./memoryModel";
+import MemoryModel from "./modelTypes/MemoryModel";
+import CustomModel from "./modelTypes/CustomModel";
+import type { ICustomModelOptions } from "./modelTypes/CustomModel";
 
 interface ICreateModelArgs {
   name: string;
+  modelType: "memory" | "custom";
+  customModelOptions: ICustomModelOptions;
 }
 
-function createModel<RecordType>({ name }: ICreateModelArgs) {
-  return new MemoryModel<RecordType>(name);
+export function defaultModelCreation(modelType: "memory" | "custom", customModelOptions: ICustomModelOptions) {
+  return <T>(name: string) => createModel<T>({ name, modelType, customModelOptions });
 }
 
-export default createModel;
+export function createModel<RecordType>({ name, modelType, customModelOptions }: ICreateModelArgs) {
+  if (modelType === "custom") {
+    return new CustomModel<RecordType>(name, customModelOptions);
+  } else {
+    return new MemoryModel<RecordType>(name);
+  }
+}

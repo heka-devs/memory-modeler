@@ -1,17 +1,66 @@
-import createModel from "../src/createModel";
+import { defaultModelCreation } from "../src/createModel";
+
+export type UniqueIdentifier = any;
 
 interface User {
+  id: UniqueIdentifier;
   firstName: string;
 }
 
-const users = createModel<User>({
-  name: "users"
-});
+const create = async (tableName: string, record: any) => {
+  console.log({ tableName });
+  return record;
+};
+
+const match = async (tableName: string, filterQuery: any) => {
+  console.log(tableName, filterQuery);
+  return filterQuery;
+};
+
+const update = async (tableName: string, record: any) => {
+  console.log(tableName, record);
+  return record;
+};
+
+const softDelete = async (tableName: string, deleteFilter: Partial<any>) => {
+  console.log(tableName, deleteFilter);
+  return 1;
+};
+
+const createModel = defaultModelCreation("memory", { create, match, update, delete: softDelete });
+
+const users = createModel<User>("users");
 
 describe("create", () => {
   test("can create a user record", async () => {
-    const user = await users.create({ firstName: "Tony" });
-    console.log(user);
-    expect(user).toEqual({ firstName: "Tony" });
+    const user = await users.create({ id: "f2eaba08-492c-494c-a1be-727856df8c6c", firstName: "Tony" });
+    expect(user).toEqual({ id: user.id, firstName: "Tony" });
+  });
+});
+
+describe("match", () => {
+  test("can match records based on query", async () => {
+    const user = await users.create({ id: "59c96c5f-6c78-4d06-9722-068280be53a3", firstName: "Denis" });
+
+    const matchedUsers = await users.match({ firstName: "Denis" });
+    expect(matchedUsers).toEqual([user]);
+  });
+});
+
+describe("update", () => {
+  test("can update record", async () => {
+    const user = await users.create({ id: "59c96c5f-6c78-4d06-9722-068280be53a3", firstName: "Denis" });
+
+    const updatedUser = await users.update({ id: user.id, firstName: "Deniz" });
+    expect(updatedUser).toEqual({ id: user.id, firstName: "Deniz" });
+  });
+});
+
+describe("delete", () => {
+  test("can delete record", async () => {
+    const user = await users.create({ id: "38d66c73-d051-4a7b-a116-953f75b26157", firstName: "Simon" });
+
+    const deletedUser = await users.delete({ id: user.id });
+    expect(deletedUser).toBe(1);
   });
 });

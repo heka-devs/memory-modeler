@@ -1,4 +1,3 @@
-
 class BaseModel<RecordType> {
   readonly _name: string;
   constructor(name: string) {
@@ -11,6 +10,10 @@ class BaseModel<RecordType> {
 
   matchPreparation(filterQuery: Partial<RecordType>) {
     return filterQuery;
+  }
+
+  updatePreparation(record: Partial<RecordType>) {
+    return record;
   }
 }
 

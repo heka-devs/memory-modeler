@@ -4,7 +4,7 @@
   "description": "An npm package to generate a generic memory model for standard query types",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "NODE_ENV=production jest",
     "build": "tsc"
   },
   "repository": {
