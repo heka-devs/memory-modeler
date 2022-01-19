@@ -69,6 +69,17 @@ class MemoryModel<RecordType, DefaultedFields = Record<string, never>> extends B
     this._records = recordsToKeep;
     return deletedCount;
   }
+
+  async matchUnique(filterQuery: Partial<RecordType>) {
+    const matches = await this.match(filterQuery);
+    if (matches.length === 1) {
+      return matches[0];
+    } else if (matches.length === 0) {
+      return null;
+    } else {
+      throw new Error("the match being made is not unique");
+    }
+  }
 }
 
 export default MemoryModel;

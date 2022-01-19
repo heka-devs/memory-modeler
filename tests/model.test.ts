@@ -28,13 +28,18 @@ const softDelete = async (tableName: string, deleteFilter: Partial<any>) => {
   return 1;
 };
 
+const matchUnique = async (tableName: string, query: any) => {
+  console.log(tableName, query);
+  return query;
+};
 const createModel = defaultModelCreation<IDefaultedFields>(
   "memory",
   {
     create,
     match,
     update,
-    delete: softDelete
+    delete: softDelete,
+    matchUnique
   },
   {
     createPreparation: (record) => {
@@ -93,5 +98,14 @@ describe("delete", () => {
 
     const deletedUser = await users.delete({ id: user.id });
     expect(deletedUser).toBe(1);
+  });
+});
+
+describe("matchUnique", () => {
+  test("can match specific record", async () => {
+    const user = await users.create({ firstName: "Enrique" });
+
+    const specifiedUser = await users.matchUnique({ firstName: "Enrique" });
+    expect(specifiedUser).toMatchObject(user);
   });
 });

@@ -6,6 +6,7 @@ export interface ICustomModelOptions {
   match: <T>(tableName: string, filterQuery: Partial<T>) => Promise<T[]>;
   update: <T>(tableName: string, record: Partial<T>) => Promise<T>;
   delete: <T>(tableName: string, deleteQuery: Partial<T>) => Promise<number>;
+  matchUnique: <T>(tableName: string, filterQuery: Partial<T>) => Promise<T | null>;
 }
 
 class CustomModel<RecordType, DefaultedFields = Record<string, never>> extends BaseModel {
@@ -36,6 +37,11 @@ class CustomModel<RecordType, DefaultedFields = Record<string, never>> extends B
     const deletedRecord = await this.customModelOptions.delete<RecordType>(this._name, deleteFilter);
     console.log({ deletedRecord });
     return true;
+  }
+
+  async matchUnique(filterQuery: Partial<RecordType>) {
+    const matchedRecords = await this.customModelOptions.matchUnique<RecordType>(this._name, filterQuery);
+    return matchedRecords;
   }
 }
 
