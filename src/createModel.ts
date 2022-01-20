@@ -6,7 +6,7 @@ import type { IMemoryModelOptions } from "./modelTypes/MemoryModel";
 export function defaultModelCreation<DefaultedFields = Record<string, never>>(
   modelType: "memory" | "custom",
   customModelOptions: ICustomModelOptions,
-  memoryModelOptions: IMemoryModelOptions
+  memoryModelOptions: IMemoryModelOptions = {}
 ) {
   return <RecordType>(name: string) =>
     createModel<RecordType, DefaultedFields>({ name, modelType, customModelOptions, memoryModelOptions });
