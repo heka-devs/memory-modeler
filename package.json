@@ -1,10 +1,11 @@
 {
   "name": "@hekahappy/memory-modeler",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "An npm package to generate a generic memory model for standard query types",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test:memory": "cross-env MODEL_TO_TEST=memory jest",
+    "test:custom": "cross-env MODEL_TO_TEST=custom jest",
     "build": "tsc"
   },
   "repository": {
@@ -26,9 +27,13 @@
     "@types/jest": "^27.4.0",
     "@typescript-eslint/eslint-plugin": "^5.9.1",
     "@typescript-eslint/parser": "^5.9.1",
+    "cross-env": "^7.0.3",
+    "dotenv": "^14.2.0",
     "eslint": "^8.7.0",
     "eslint-config-prettier": "^8.3.0",
     "jest": "^27.4.7",
+    "knex": "^1.0.1",
+    "mysql": "^2.18.1",
     "prettier": "^2.5.1",
     "ts-jest": "^27.1.3",
     "typescript": "^4.5.4"

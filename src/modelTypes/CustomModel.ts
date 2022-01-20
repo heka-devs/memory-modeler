@@ -4,7 +4,7 @@ import type { Without } from "../types";
 export interface ICustomModelOptions {
   create: <T>(tableName: string, record: any) => Promise<T>;
   match: <T>(tableName: string, filterQuery: Partial<T>) => Promise<T[]>;
-  update: <T>(tableName: string, record: Partial<T>) => Promise<T>;
+  update: <T>(tableName: string, updateFilter: Partial<T>, updateFields: Partial<T>) => Promise<number>;
   delete: <T>(tableName: string, deleteQuery: Partial<T>) => Promise<number>;
   matchUnique: <T>(tableName: string, filterQuery: Partial<T>) => Promise<T | null>;
 }
@@ -27,16 +27,19 @@ class CustomModel<RecordType, DefaultedFields = Record<string, never>> extends B
     return matchedRecords;
   }
 
-  async update(record: Partial<RecordType>) {
-    const updatedRecord = await this.customModelOptions.update<Partial<RecordType>>(this._name, record);
+  async update(updateFilter: Partial<RecordType>, updateFields: Partial<RecordType>) {
+    const countOfUpdatedRecords = await this.customModelOptions.update<Partial<RecordType>>(
+      this._name,
+      updateFilter,
+      updateFields
+    );
 
-    return updatedRecord;
+    return countOfUpdatedRecords;
   }
 
   async delete(deleteFilter: Partial<RecordType>) {
-    const deletedRecord = await this.customModelOptions.delete<RecordType>(this._name, deleteFilter);
-    console.log({ deletedRecord });
-    return true;
+    const deletedRecordCount = await this.customModelOptions.delete<RecordType>(this._name, deleteFilter);
+    return deletedRecordCount;
   }
 
   async matchUnique(filterQuery: Partial<RecordType>) {

@@ -1,44 +1,22 @@
 import { defaultModelCreation } from "../src/createModel";
-
+import { create, match, update, deleteRecords, matchUnique } from "./customModelHelper";
 interface User {
   id: string;
   createdAt: string;
   updatedAt: string;
-  firstName: string;
+  name: string;
 }
 type IDefaultedFields = Pick<User, "id" | "createdAt" | "updatedAt">;
 
-const create = async (tableName: string, record: any) => {
-  console.log({ tableName });
-  return record;
-};
+const modelTypeToTest: "custom" | "memory" = (process.env.MODEL_TO_TEST as "custom" | "memory") || "custom";
 
-const match = async (tableName: string, filterQuery: any) => {
-  console.log(tableName, filterQuery);
-  return filterQuery;
-};
-
-const update = async (tableName: string, record: any) => {
-  console.log(tableName, record);
-  return record;
-};
-
-const softDelete = async (tableName: string, deleteFilter: Partial<any>) => {
-  console.log(tableName, deleteFilter);
-  return 1;
-};
-
-const matchUnique = async (tableName: string, query: any) => {
-  console.log(tableName, query);
-  return query;
-};
 const createModel = defaultModelCreation<IDefaultedFields>(
-  "memory",
+  modelTypeToTest,
   {
     create,
     match,
     update,
-    delete: softDelete,
+    delete: deleteRecords,
     matchUnique
   },
   {
@@ -59,53 +37,58 @@ const users = createModel<User>("users");
 
 describe("create", () => {
   test("can create a user record", async () => {
-    const user = await users.create({ firstName: "Tony" });
-    expect(user).toEqual({
+    const user = await users.create({ name: "Tony" });
+    expect(user).toMatchObject({
       id: user.id,
-      firstName: "Tony",
-      createdAt: "2000-10-00T10:00:00",
-      updatedAt: "2000-10-00T10:00:00"
+      name: "Tony"
     });
+    if (modelTypeToTest === "memory") {
+      expect(user).toMatchObject({ createdAt: "2000-10-00T10:00:00", updatedAt: "2000-10-00T10:00:00" });
+    }
   });
 });
 
 describe("match", () => {
   test("can match records based on query", async () => {
-    const user = await users.create({ firstName: "Denis" });
+    const user = await users.create({ name: "Denis" });
 
-    const matchedUsers = await users.match({ id: user.id, firstName: "Denis" });
+    const matchedUsers = await users.match({ id: user.id });
     expect(matchedUsers.length).toBe(1);
-    expect(matchedUsers[0].firstName).toBe("Denis");
+    expect(matchedUsers[0].name).toBe("Denis");
   });
 });
 
 describe("update", () => {
   test("can update record", async () => {
-    const user = await users.create({ firstName: "denis2" });
+    const user = await users.create({ name: "denis2" });
 
-    const updatedUserCount = await users.update({ id: user.id }, { firstName: "Deniz" });
+    const updatedUserCount = await users.update({ id: user.id }, { name: "Deniz" });
     expect(updatedUserCount).toBe(1);
-    const updatedUser = await users.match({ id: user.id });
-    expect(updatedUser).toEqual([
-      { id: user.id, firstName: "Deniz", createdAt: "2000-10-00T10:00:00", updatedAt: "2020-12-00T10:00:00" }
-    ]);
+    const updatedUsers = await users.match({ id: user.id });
+    expect(updatedUsers).toMatchObject([{ id: user.id, name: "Deniz" }]);
+    if (modelTypeToTest === "memory") {
+      expect(updatedUsers[0]).toMatchObject({ createdAt: "2000-10-00T10:00:00", updatedAt: "2020-12-00T10:00:00" });
+    }
   });
 });
 
 describe("delete", () => {
   test("can delete record", async () => {
-    const user = await users.create({ firstName: "Simon" });
+    const _user1 = await users.create({ name: "SimonDelete" });
+    const _user2 = await users.create({ name: "SimonDelete" });
 
-    const deletedUser = await users.delete({ id: user.id });
-    expect(deletedUser).toBe(1);
+    const deletedUserCount = await users.delete({ name: "SimonDelete" });
+    expect(deletedUserCount).toBe(2);
+    const deletedUsers = await users.match({ name: "SimonDelete" });
+    expect(deletedUsers.length).toBe(0);
   });
 });
 
 describe("matchUnique", () => {
   test("can match specific record", async () => {
-    const user = await users.create({ firstName: "Enrique" });
+    const user = await users.create({ name: "Tom" });
 
-    const specifiedUser = await users.matchUnique({ firstName: "Enrique" });
+    const specifiedUser = await users.matchUnique({ id: user.id });
     expect(specifiedUser).toMatchObject(user);
   });
 });
