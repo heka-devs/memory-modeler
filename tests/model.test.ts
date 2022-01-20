@@ -1,7 +1,7 @@
 import { defaultModelCreation } from "../src/createModel";
 import { create, match, update, deleteRecords, matchUnique } from "./customModelHelper";
 interface User {
-  id: string;
+  id: number;
   createdAt: string;
   updatedAt: string;
   name: string;
@@ -26,7 +26,7 @@ const createModel = defaultModelCreation<IDefaultedFields>(
       record.updatedAt = "2000-10-00T10:00:00";
       return record;
     },
-    updatePreparation: (record) => {
+    updatePreparation: (record: any) => {
       record.updatedAt = "2020-12-00T10:00:00";
       return record;
     }

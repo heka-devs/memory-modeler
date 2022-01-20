@@ -1,6 +1,6 @@
 {
   "editor.tabSize": 2,
-  "cSpell.words": ["Deniz", "heka", "hekahappy", "Millis", "modeler"],
+  "cSpell.words": ["Deniz", "heka", "hekahappy", "Millis", "modeler", "npmjs"],
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true
 }

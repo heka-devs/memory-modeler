@@ -2,8 +2,8 @@ import BaseModel from "./BaseModel";
 import type { Without } from "../types";
 
 export interface IMemoryModelOptions {
-  createPreparation: <T>(record: any) => T;
-  updatePreparation: <T>(record: any) => T;
+  createPreparation: (record: any) => any;
+  updatePreparation: (record: any) => any;
 }
 
 class MemoryModel<RecordType, DefaultedFields = Record<string, never>> extends BaseModel {
@@ -24,7 +24,7 @@ class MemoryModel<RecordType, DefaultedFields = Record<string, never>> extends B
   }
 
   async create(record: Without<RecordType, DefaultedFields>) {
-    const recordWithDefaults = this.memoryModelOptions.createPreparation<RecordType>({ ...record });
+    const recordWithDefaults = this.memoryModelOptions.createPreparation({ ...record }) as RecordType;
     this._records.push(recordWithDefaults);
     return recordWithDefaults;
   }
@@ -41,7 +41,7 @@ class MemoryModel<RecordType, DefaultedFields = Record<string, never>> extends B
   async update(updateFilter: Partial<RecordType>, updateFields: Partial<RecordType>) {
     let fieldsCopy = { ...updateFields };
     if (this.memoryModelOptions.updatePreparation) {
-      fieldsCopy = this.memoryModelOptions.updatePreparation<Partial<RecordType>>(updateFields);
+      fieldsCopy = this.memoryModelOptions.updatePreparation(updateFields) as Partial<RecordType>;
     }
 
     let updateCounter = 0;

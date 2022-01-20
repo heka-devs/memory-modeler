@@ -14,17 +14,17 @@ const dbConnection = {
 
 const database = knex(dbConnection);
 
-export const create = async (tableName: string, record: any) => {
+export const create = async <T>(tableName: string, record: T) => {
   const [id] = await database(tableName).insert(record);
   console.log("created new record:", { id });
   return matchUnique(tableName, { id });
 };
 
-export const match = async (tableName: string, query: any) => {
+export const match = async <T>(tableName: string, query: T) => {
   return database(tableName).select("*").where(query);
 };
 
-export const matchUnique = async (tableName: string, query: any) => {
+export const matchUnique = async <T>(tableName: string, query: T) => {
   const matches = await match(tableName, query);
   if (matches.length === 1) {
     console.log("matchUnique matched result");
@@ -38,12 +38,12 @@ export const matchUnique = async (tableName: string, query: any) => {
   }
 };
 
-export const update = async (tableName: string, updateFilter: any, updateFields: any) => {
+export const update = async <T>(tableName: string, updateFilter: T, updateFields: T) => {
   const updatedResultCount = await database(tableName).where(updateFilter).update(updateFields);
   return updatedResultCount;
 };
 
-export const deleteRecords = async <T>(tableName: string, deleteQuery: Partial<T>) => {
+export const deleteRecords = async <T>(tableName: string, deleteQuery: T) => {
   const deletedRecordCount = await database(tableName).where(deleteQuery).del();
   return deletedRecordCount;
 };
