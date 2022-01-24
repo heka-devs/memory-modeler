@@ -31,7 +31,7 @@ class CustomModel<RecordType, DefaultedFields = Record<string, never>> extends B
 
   async match(filterQuery: Partial<RecordType>) {
     if (this.customModelOptions.match) {
-      const matchedRecords = await this.customModelOptions.match<Partial<RecordType>>(this._name, filterQuery);
+      const matchedRecords = await this.customModelOptions.match<RecordType>(this._name, filterQuery);
       return matchedRecords;
     } else {
       throw new Error("Custom model match function not implemented");
@@ -63,7 +63,7 @@ class CustomModel<RecordType, DefaultedFields = Record<string, never>> extends B
 
   async matchUnique(filterQuery: Partial<RecordType>) {
     if (this.customModelOptions.matchUnique && this.customModelOptions.matchUnique) {
-      const matchedRecords = await this.customModelOptions.matchUnique<Partial<RecordType>>(this._name, filterQuery);
+      const matchedRecords = await this.customModelOptions.matchUnique<RecordType>(this._name, filterQuery);
       return matchedRecords;
     } else {
       throw new Error("Custom model matchUnique function not implemented");

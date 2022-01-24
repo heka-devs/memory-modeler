@@ -1,11 +1,12 @@
 {
   "name": "@hekahappy/memory-modeler",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "An npm package to generate a generic memory model for standard query types",
   "main": "index.js",
   "scripts": {
     "test:memory": "cross-env MODEL_TO_TEST=memory jest",
     "test:custom": "cross-env MODEL_TO_TEST=custom jest",
+    "test": "npm run test:memory && test:custom",
     "build": "tsc"
   },
   "repository": {
