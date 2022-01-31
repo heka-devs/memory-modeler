@@ -31,3 +31,5 @@ export function createModel<RecordType, DefaultedFields>({
     return new MemoryModel<RecordType, DefaultedFields>(name, memoryModelOptions);
   }
 }
+
+export { MemoryModel, CustomModel };
