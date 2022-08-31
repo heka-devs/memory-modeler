@@ -42,6 +42,21 @@ class MemoryModel<RecordType, DefaultedFields = Record<string, never>> extends B
     return matchedRecords;
   }
 
+  async matchWhereIn(whereQuery: Partial<RecordType>, havingInQuery: { [key: string]: any[] }) {
+    const whereQueryFilteredMatches = this._records.filter((record) => {
+      const recordMatchesFilter = this.doesRecordMatchFilter(record, whereQuery);
+      return recordMatchesFilter;
+    });
+
+    const whereInQueryFilteredMatches = whereQueryFilteredMatches.filter((record) => {
+      const havingInColumn = Object.keys(havingInQuery)[0];
+      const havingInValues = havingInQuery[havingInColumn];
+      return havingInValues.includes(record[havingInColumn as keyof RecordType]);
+    });
+
+    return whereInQueryFilteredMatches;
+  }
+
   async update(updateFilter: Partial<RecordType>, updateFields: Partial<RecordType>) {
     let fieldsCopy = { ...updateFields };
     if (this.memoryModelOptions.updatePreparation) {

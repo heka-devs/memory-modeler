@@ -24,6 +24,16 @@ export const match = async <T>(tableName: string, query: T) => {
   return database(tableName).select("*").where(query);
 };
 
+export const matchWhereIn = async <T>(
+  tableName: string,
+  whereQuery: Partial<T>,
+  havingInQuery: { [key: string]: any[] }
+) => {
+  const havingInColumn = Object.keys(havingInQuery)[0];
+  const havingInValues = havingInQuery[havingInColumn];
+  return database(tableName).select("*").where(whereQuery).havingIn(havingInColumn, havingInValues);
+};
+
 export const matchUnique = async <T>(tableName: string, query: T) => {
   const matches = await match(tableName, query);
   if (matches.length === 1) {
