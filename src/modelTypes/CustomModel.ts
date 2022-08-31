@@ -4,6 +4,11 @@ import type { Without } from "../types";
 export interface ICustomModelOptions {
   create?: <I, O>(tableName: string, record: I) => Promise<O>;
   match?: <T>(tableName: string, filterQuery: Partial<T>) => Promise<T[]>;
+  matchWhereIn?: <T>(
+    tableName: string,
+    whereQuery: Partial<T>,
+    havingInQuery: { [key: string]: any[] }
+  ) => Promise<T[]>;
   update?: <T>(tableName: string, updateFilter: Partial<T>, updateFields: Partial<T>) => Promise<number>;
   delete?: <T>(tableName: string, deleteQuery: Partial<T>) => Promise<number>;
   matchUnique?: <T>(tableName: string, filterQuery: Partial<T>) => Promise<T | null>;
@@ -35,6 +40,19 @@ class CustomModel<RecordType, DefaultedFields = Record<string, never>> extends B
       return matchedRecords;
     } else {
       throw new Error("Custom model match function not implemented");
+    }
+  }
+
+  async matchWhereIn(whereQuery: Partial<RecordType>, havingInQuery: { [key: string]: any[] }) {
+    if (this.customModelOptions.matchWhereIn) {
+      const matchedRecords = await this.customModelOptions.matchWhereIn<RecordType>(
+        this._name,
+        whereQuery,
+        havingInQuery
+      );
+      return matchedRecords;
+    } else {
+      throw new Error("Custom model matchWhereIn function not implemented");
     }
   }
 
